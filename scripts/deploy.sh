@@ -52,7 +52,7 @@ if [[ -z "$location_display_name" ]] || ! jq -e --arg location "$location_displa
   exit 1
 fi
 postgres_sku_count=$(az postgres flexible-server list-skus --location "$location" \
-  --query "length([?name=='Standard_B1ms'])" -o tsv)
+  --query "length([].supportedServerEditions[].supportedServerSkus[?name=='Standard_B1ms'][])" -o tsv)
 if [[ "$postgres_sku_count" == "0" ]]; then
   echo "PostgreSQL Standard_B1ms is unavailable in ${location}." >&2
   exit 1
