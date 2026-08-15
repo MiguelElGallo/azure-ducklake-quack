@@ -29,6 +29,12 @@ jobs:
       - run: az bicep install
       - run: az bicep build --file infra/main.bicep --stdout >/dev/null
 
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: shellcheck scripts/*.sh tests/spike/*.sh
+
   integration:
     runs-on: ubuntu-latest
     timeout-minutes: 20

@@ -88,6 +88,30 @@ echo "ACA Consumption quota gate passed: ${consumption_quota}"
 
 registry_name=$(azd env get-value AZURE_CONTAINER_REGISTRY_NAME)
 registry_server=$(azd env get-value AZURE_CONTAINER_REGISTRY_ENDPOINT)
+registry_id=$(az acr show --name "$registry_name" --resource-group "$resource_group" --query id -o tsv)
+pull_principals=$(az identity list --resource-group "$resource_group" \
+  --query "[?starts_with(name, 'id-azdq-')].principalId" -o json)
+if [[ "$(jq 'length' <<<"$pull_principals")" != "4" ]]; then
+  echo "Expected exactly four project managed identities before the ACR gate." >&2
+  exit 1
+fi
+for attempt in {1..30}; do
+  pull_assignments=$(az role assignment list --scope "$registry_id" -o json)
+  if jq -e --argjson principals "$pull_principals" '
+    [.[] | select(.roleDefinitionName == "AcrPull") | .principalId] as $actual
+    | all($principals[]; . as $id | $actual | index($id) != null)
+  ' <<<"$pull_assignments" >/dev/null; then
+    echo "AcrPull propagation gate passed for all four managed identities."
+    break
+  fi
+  if [[ "$attempt" == "30" ]]; then
+    echo "AcrPull did not propagate to all four managed identities within five minutes." >&2
+    exit 1
+  fi
+  echo "Waiting for AcrPull propagation (${attempt}/30)."
+  sleep 10
+done
+
 revision=$(git rev-parse --short=12 HEAD)
 gateway_tag="v0.1.0-${revision}"
 runtime_tag="v0.1.0-${revision}"
