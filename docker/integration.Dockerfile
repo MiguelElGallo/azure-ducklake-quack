@@ -28,12 +28,14 @@ RUN apt-get update \
     && HOME=/opt/azdq /usr/local/bin/duckdb -c "INSTALL azure; INSTALL ducklake; INSTALL postgres; INSTALL quack;" \
     && rm /tmp/duckdb.zip
 
+# Mirror the production image's Azure SDK certificate discovery path.
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates libgcc-s1 libstdc++6 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 azdq \
-    && mkdir -p /tmp/azdq \
+    && mkdir -p /tmp/azdq /etc/pki/tls/certs \
+    && ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt \
     && chown azdq:azdq /tmp/azdq
 COPY --from=extensions --chown=10001:10001 /opt/azdq/.duckdb /home/azdq/.duckdb
 COPY --from=extensions /usr/local/bin/duckdb /usr/local/bin/duckdb
