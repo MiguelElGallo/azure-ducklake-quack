@@ -200,7 +200,6 @@ resource gateway 'Microsoft.App/containerApps@2025-01-01' = {
             { name: 'ENTRA_WRITER_GROUP_ID', value: entraWriterGroupId }
             { name: 'READER_QUACK_TOKEN', secretRef: 'reader-token' }
             { name: 'WRITER_QUACK_TOKEN', secretRef: 'writer-token' }
-            { name: 'AZDQ_EASYAUTH_CLIENT_SECRET', secretRef: 'easyauth-client-secret' }
             { name: 'RUST_LOG', value: 'info' }
           ]
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
@@ -239,7 +238,7 @@ resource auth 'Microsoft.App/containerApps/authConfigs@2025-01-01' = {
         enabled: true
         registration: {
           clientId: entraApiClientId
-          clientSecretSettingName: 'AZDQ_EASYAUTH_CLIENT_SECRET'
+          clientSecretSettingName: 'easyauth-client-secret'
           openIdIssuer: issuer
         }
         validation: {
