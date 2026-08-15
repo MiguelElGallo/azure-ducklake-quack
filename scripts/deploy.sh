@@ -17,7 +17,7 @@ az account set --subscription "$subscription_id"
 # one approved subscription mutation (Microsoft.Network registration).
 if [[ "$(az group exists --name "$resource_group")" == "true" ]]; then
   project_tag=$(az group show --name "$resource_group" --query 'tags.project' -o tsv)
-  owner_tag=$(az group show --name "$resource_group" --query 'tags.azd-env-name' -o tsv)
+  owner_tag=$(az group show --name "$resource_group" --query 'tags."azd-env-name"' -o tsv)
   if [[ "$project_tag" != "azure-ducklake-quack" || "$owner_tag" != "$environment_name" ]]; then
     echo "Refusing to adopt pre-existing resource group: ${resource_group}" >&2
     exit 1
