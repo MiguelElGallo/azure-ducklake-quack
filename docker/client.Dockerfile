@@ -5,7 +5,8 @@ COPY crates ./crates
 RUN cargo build --locked --release --package azdq-client --bin azdq
 
 FROM debian:bookworm-slim AS duckdb
-ARG TARGETARCH
+# Default for classic Docker builders; multi-platform callers may override it.
+ARG TARGETARCH=amd64
 ARG DUCKDB_VERSION=v1.5.5
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl unzip \

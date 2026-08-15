@@ -15,7 +15,8 @@ RUN --mount=type=cache,id=azdq-cargo-registry,target=/usr/local/cargo/registry \
     && cp /src/target/release/bootstrap /out/bootstrap
 
 FROM debian:bookworm-slim AS extensions
-ARG TARGETARCH
+# Default for classic Docker builders; multi-platform callers may override it.
+ARG TARGETARCH=amd64
 ARG DUCKDB_VERSION=v1.5.5
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl unzip \

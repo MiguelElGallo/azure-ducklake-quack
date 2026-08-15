@@ -5,7 +5,9 @@ COPY crates ./crates
 RUN cargo build --locked --release --package azdq-runtime --bins
 
 FROM debian:bookworm-slim AS extensions
-ARG TARGETARCH
+# ACR's classic builder does not always inject BuildKit's automatic platform
+# arguments. ACA runs amd64 here, while callers can still override this value.
+ARG TARGETARCH=amd64
 ARG DUCKDB_VERSION=v1.5.5
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl unzip \
