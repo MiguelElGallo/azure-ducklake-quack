@@ -61,6 +61,9 @@ resource bootstrap 'Microsoft.App/jobs@2025-01-01' = {
             { name: 'POSTGRES_READER_PASSWORD', secretRef: 'reader-password' }
             { name: 'POSTGRES_WRITER_USER', value: 'azdq_writer' }
             { name: 'POSTGRES_WRITER_PASSWORD', secretRef: 'writer-password' }
+            // Keep bootstrap storage access on the same explicit trust bundle as the runtimes.
+            { name: 'SSL_CERT_FILE', value: '/etc/ssl/certs/ca-certificates.crt' }
+            { name: 'CURL_CA_BUNDLE', value: '/etc/ssl/certs/ca-certificates.crt' }
           ]
           resources: { cpu: json('0.5'), memory: '1Gi' }
         }
