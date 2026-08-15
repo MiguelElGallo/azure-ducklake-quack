@@ -12,9 +12,10 @@ native_name="Azure DuckLake Quack CLI (${environment_name})"
 reader_name="Azure DuckLake Quack Readers (${environment_name})"
 writer_name="Azure DuckLake Quack Writers (${environment_name})"
 ownership_marker="azure-ducklake-quack:${environment_name}"
+environment_values=$(azd env get-values --output json)
 
 get_env() {
-  azd env get-value "$1" 2>/dev/null || true
+  jq -r --arg name "$1" '.[$name] // empty' <<<"$environment_values"
 }
 
 ensure_absent() {
