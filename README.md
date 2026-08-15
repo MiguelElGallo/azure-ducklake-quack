@@ -19,7 +19,8 @@ The implementation is Rust; the data plane remains DuckDB and DuckLake.
 - A Rust device-code client that passes the Entra bearer token through Quack's
   supported `EXTRA_HTTP_HEADERS` option.
 - Modular Bicep and a three-stage immutable-image deployment.
-- An executable Linux integration spike using PostgreSQL 17 and DuckDB 1.5.5.
+- An executable Linux integration spike using PostgreSQL 17, a stable DuckDB
+  1.5.5 server, and a checksum-pinned official v1.5 preview client.
 
 It does **not** implement Quack messages. The gateway streams opaque
 `application/duckdb` HTTP bodies between the client and the selected Quack
@@ -77,6 +78,7 @@ shellcheck scripts/*.sh tests/spike/*.sh
 az bicep build --file infra/main.bicep --stdout >/dev/null
 docker build -f docker/gateway.Dockerfile .
 docker build -f docker/runtime.Dockerfile .
+docker build -f docker/client.Dockerfile .
 ./tests/spike/quack-postgres.sh
 ```
 

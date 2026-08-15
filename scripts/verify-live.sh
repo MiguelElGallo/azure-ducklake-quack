@@ -7,6 +7,16 @@ tenant_id=$(azd env get-value AZDQ_TENANT_ID)
 client_id=$(azd env get-value AZDQ_NATIVE_CLIENT_ID)
 scope=$(azd env get-value AZDQ_API_SCOPE)
 job_name=$(azd env get-value BOOTSTRAP_JOB_NAME)
+duckdb_path=${DUCKDB_PATH:-duckdb}
+
+# Stable 1.5.5 rejects EXTRA_HTTP_HEADERS. Feature-probe the actual executable
+# before starting an interactive Entra flow so failures are immediate and clear.
+if ! "$duckdb_path" -no-init -batch -bail -c \
+  "LOAD quack; CREATE SECRET azdq_header_probe (TYPE quack, TOKEN 'header-probe-token', EXTRA_HTTP_HEADERS MAP {'Authorization': 'Bearer probe'});" \
+  >/dev/null 2>&1; then
+  echo "DUCKDB_PATH must point to a DuckDB/Quack pair with EXTRA_HTTP_HEADERS support; see docs/compatibility.md." >&2
+  exit 1
+fi
 
 curl --fail --silent --show-error "${gateway_url}/healthz" -o /dev/null
 unauthenticated_status=$(curl --silent --output /dev/null --write-out '%{http_code}' "${gateway_url}/session")

@@ -5,15 +5,13 @@ COPY crates ./crates
 RUN cargo build --locked --release --package azdq-runtime --bins
 
 FROM debian:bookworm-slim AS extensions
-# ACR's classic builder does not always inject BuildKit's automatic platform
-# arguments. ACA runs amd64 here, while callers can still override this value.
-ARG TARGETARCH=amd64
 ARG DUCKDB_VERSION=v1.5.5
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl unzip \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /opt/azdq \
-    && case "$TARGETARCH" in amd64) DUCKDB_ARCH=amd64 ;; arm64) DUCKDB_ARCH=arm64 ;; *) exit 1 ;; esac \
+    && DEB_ARCH=$(dpkg --print-architecture) \
+    && case "$DEB_ARCH" in amd64) DUCKDB_ARCH=amd64 ;; arm64) DUCKDB_ARCH=arm64 ;; *) exit 1 ;; esac \
     && curl -fsSL "https://github.com/duckdb/duckdb/releases/download/${DUCKDB_VERSION}/duckdb_cli-linux-${DUCKDB_ARCH}.zip" -o /tmp/duckdb.zip \
     && unzip -q /tmp/duckdb.zip -d /usr/local/bin \
     && HOME=/opt/azdq /usr/local/bin/duckdb -c "INSTALL azure; INSTALL ducklake; INSTALL postgres; INSTALL quack;" \
