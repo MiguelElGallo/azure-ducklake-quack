@@ -78,7 +78,7 @@ resource reader 'Microsoft.App/containerApps@2025-01-01' = {
             { name: 'QUACK_TOKEN', secretRef: 'quack-token' }
             // Give libcurl/Azure SDK an explicit Debian CA bundle inside ACA.
             { name: 'SSL_CERT_FILE', value: '/etc/ssl/certs/ca-certificates.crt' }
-            { name: 'CURL_CA_BUNDLE', value: '/etc/ssl/certs/ca-certificates.crt' }
+            { name: 'CURL_CA_INFO', value: '/etc/ssl/certs/ca-certificates.crt' }
             { name: 'RUST_LOG', value: 'info' }
           ]
           resources: { cpu: json('0.5'), memory: '1Gi' }
@@ -143,7 +143,7 @@ resource writer 'Microsoft.App/containerApps@2025-01-01' = {
             { name: 'QUACK_TOKEN', secretRef: 'quack-token' }
             // Give libcurl/Azure SDK an explicit Debian CA bundle inside ACA.
             { name: 'SSL_CERT_FILE', value: '/etc/ssl/certs/ca-certificates.crt' }
-            { name: 'CURL_CA_BUNDLE', value: '/etc/ssl/certs/ca-certificates.crt' }
+            { name: 'CURL_CA_INFO', value: '/etc/ssl/certs/ca-certificates.crt' }
             { name: 'RUST_LOG', value: 'info' }
           ]
           resources: { cpu: json('0.5'), memory: '1Gi' }

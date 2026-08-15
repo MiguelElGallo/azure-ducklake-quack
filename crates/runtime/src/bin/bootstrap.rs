@@ -6,7 +6,7 @@ use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;
 use tokio_postgres::{Client, Config as PostgresConfig, NoTls, config::SslMode};
 
-use azdq_runtime::sql_string;
+use azdq_runtime::{azure_extension_setup_sql, sql_string};
 
 struct BootstrapSettings {
     host: String,
@@ -127,9 +127,11 @@ fn initialize_ducklake(settings: &BootstrapSettings) -> Result<()> {
         write!(
             sql,
             "LOAD azure;\n\
+             {}\n\
              CREATE SECRET azdq_storage (\n\
                TYPE AZURE, PROVIDER MANAGED_IDENTITY, ACCOUNT_NAME {}, CLIENT_ID {}\n\
              );\n",
+            azure_extension_setup_sql(),
             sql_string(account),
             sql_string(client_id),
         )?;

@@ -199,9 +199,11 @@ fn temporary_secret_sql(settings: &Settings) -> Result<String> {
         write!(
             statements,
             "LOAD azure;\n\
+             {}\n\
              CREATE OR REPLACE TEMPORARY SECRET azdq_storage (\n\
                TYPE AZURE, PROVIDER MANAGED_IDENTITY, ACCOUNT_NAME {}, CLIENT_ID {}\n\
              );\n",
+            azure_extension_setup_sql(),
             sql_string(account_name),
             sql_string(managed_identity_client_id),
         )?;
@@ -216,6 +218,15 @@ fn temporary_secret_sql(settings: &Settings) -> Result<String> {
         sql_string(&settings.metadata_schema),
     )?;
     Ok(statements)
+}
+
+/// Configure the Azure extension for Linux container certificate discovery.
+///
+/// `DuckDB` documents the curl adapter as the workaround for the Azure SDK's
+/// statically linked default adapter failing to locate Linux CA bundles.
+#[must_use]
+pub fn azure_extension_setup_sql() -> &'static str {
+    "SET azure_transport_option_type = 'curl';"
 }
 
 #[must_use]
@@ -260,12 +271,18 @@ mod tests {
 
     #[test]
     fn reader_startup_is_read_only_and_keeps_extension_guards() {
-        let sql = server_startup_sql(&settings(Role::Reader));
+        let mut settings = settings(Role::Reader);
+        settings.storage_provider = StorageProvider::Azure {
+            account_name: "storage".to_owned(),
+            managed_identity_client_id: "identity".to_owned(),
+        };
+        let sql = server_startup_sql(&settings);
         assert!(sql.contains("AS lake (READ_ONLY)"));
         assert!(sql.contains("SET allow_community_extensions = false"));
         assert!(sql.contains("SET allow_unsigned_extensions = false"));
         assert!(!sql.contains("SET autoinstall_known_extensions"));
         assert!(sql.contains("CREATE OR REPLACE TEMPORARY SECRET"));
+        assert!(sql.contains(azure_extension_setup_sql()));
         assert!(!sql.contains("PERSISTENT SECRET"));
     }
 
