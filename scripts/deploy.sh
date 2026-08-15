@@ -73,7 +73,7 @@ aca_environment=$(azd env get-value AZURE_CONTAINER_APPS_ENVIRONMENT_NAME)
 consumption_quota=$(az containerapp env list-usages \
   --name "$aca_environment" \
   --resource-group "$resource_group" \
-  --query "[?name.value=='ManagedEnvironmentConsumptionCores'] | [0].{current:currentValue,limit:limit}" \
+  --query "value[?name.value=='ManagedEnvironmentConsumptionCores'] | [0].{current:currentValue,limit:limit}" \
   -o json)
 # Three apps can request 1.25 cores together. Reserve another 1.25 so a later
 # single-revision rollout can overlap old and new replicas without exhausting quota.
