@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "${AZURE_ENV_NAME}" },
+    "location": { "value": "${AZURE_LOCATION}" },
+    "deployBootstrap": { "value": "${AZDQ_DEPLOY_BOOTSTRAP=false}" },
+    "deployApps": { "value": "${AZDQ_DEPLOY_APPS=false}" },
+    "postgresAdminPassword": { "value": "${AZDQ_POSTGRES_ADMIN_PASSWORD}" },
+    "postgresReaderPassword": { "value": "${AZDQ_POSTGRES_READER_PASSWORD}" },
+    "postgresWriterPassword": { "value": "${AZDQ_POSTGRES_WRITER_PASSWORD}" },
+    "readerQuackToken": { "value": "${AZDQ_READER_QUACK_TOKEN}" },
+    "writerQuackToken": { "value": "${AZDQ_WRITER_QUACK_TOKEN}" },
+    "easyAuthClientSecret": { "value": "${AZDQ_API_CLIENT_SECRET}" },
+    "entraApiClientId": { "value": "${AZDQ_API_CLIENT_ID}" },
+    "entraNativeClientId": { "value": "${AZDQ_NATIVE_CLIENT_ID}" },
+    "entraReaderGroupId": { "value": "${AZDQ_READER_GROUP_ID}" },
+    "entraWriterGroupId": { "value": "${AZDQ_WRITER_GROUP_ID}" },
+    "gatewayImage": { "value": "${AZDQ_GATEWAY_IMAGE=}" },
+    "runtimeImage": { "value": "${AZDQ_RUNTIME_IMAGE=}" }
+  }
+}

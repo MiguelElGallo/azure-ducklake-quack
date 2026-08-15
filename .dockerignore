@@ -1,0 +1,8 @@
+.git
+.azure
+target
+.env
+.env.*
+*.duckdb
+*.wal
+

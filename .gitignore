@@ -1,0 +1,11 @@
+.azure/
+.env
+.env.*
+!.env.example
+/target/
+**/*.duckdb
+**/*.wal
+*.pem
+*.pfx
+*.key
+
