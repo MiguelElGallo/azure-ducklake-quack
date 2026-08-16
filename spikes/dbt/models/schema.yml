@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: direct_dbt_smoke
+    description: >-
+      A one-row proof that dbt Core 2 wrote directly through DuckDB ADBC into
+      DuckLake, without using the Quack gateway or runtime.
+    columns:
+      - name: run_id
+        data_tests:
+          - not_null
+      - name: built_at
+        data_tests:
+          - not_null
+      - name: connection_path
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["dbt-core-2-duckdb-adbc-ducklake"]

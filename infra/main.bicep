@@ -7,6 +7,7 @@ param environmentName string
 param location string = 'swedencentral'
 param deployBootstrap bool = false
 param deployApps bool = false
+param deployDbtSpike bool = false
 
 @secure()
 param postgresAdminPassword string
@@ -27,6 +28,7 @@ param entraReaderGroupId string
 param entraWriterGroupId string
 param gatewayImage string = ''
 param runtimeImage string = ''
+param dbtSpikeImage string = ''
 
 var suffix = take(uniqueString(subscription().id, environmentName, location), 6)
 var tags = {
@@ -152,6 +154,26 @@ module bootstrap './modules/bootstrap.bicep' = if (deployBootstrap) {
   }
 }
 
+module dbtSpike './modules/dbt-spike.bicep' = if (deployDbtSpike) {
+  name: 'dbt-spike'
+  scope: resourceGroup
+  params: {
+    name: environmentName
+    location: location
+    tags: tags
+    containerAppsEnvironmentId: platform.outputs.containerAppsEnvironmentId
+    registryServer: platform.outputs.registryServer
+    dbtSpikeImage: dbtSpikeImage
+    writerIdentityId: identities.outputs.writerIdentityId
+    writerIdentityClientId: identities.outputs.writerClientId
+    storageAccountName: data.outputs.storageAccountName
+    dataPath: data.outputs.dataPath
+    postgresServerFqdn: data.outputs.postgresServerFqdn
+    postgresDatabaseName: data.outputs.postgresDatabaseName
+    postgresWriterPasswordSecretUri: data.outputs.secretUris.postgresWriterPassword
+  }
+}
+
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = platform.outputs.registryServer
 output AZURE_CONTAINER_REGISTRY_NAME string = platform.outputs.registryName
@@ -161,5 +183,6 @@ output AZURE_LOG_ANALYTICS_WORKSPACE_ID string = monitoring.outputs.workspaceId
 output AZURE_STORAGE_ACCOUNT string = data.outputs.storageAccountName
 output POSTGRES_SERVER_FQDN string = data.outputs.postgresServerFqdn
 output BOOTSTRAP_JOB_NAME string = deployBootstrap ? bootstrap!.outputs.jobName : ''
+output DBT_SPIKE_JOB_NAME string = deployDbtSpike ? dbtSpike!.outputs.jobName : ''
 output GATEWAY_URL string = deployApps ? apps!.outputs.gatewayUrl : ''
 output QUACK_URI string = deployApps ? apps!.outputs.quackUri : ''

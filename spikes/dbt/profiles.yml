@@ -1,0 +1,46 @@
+azdq_dbt_spike:
+  target: "{{ env_var('DBT_TARGET', 'writer') }}"
+  outputs:
+    writer:
+      type: duckdb
+      path: ":memory:"
+      schema: dbt_spike
+      threads: 1
+      extensions:
+        - azure
+        - postgres
+      settings:
+        azure_transport_option_type: curl
+        allow_community_extensions: false
+        allow_unsigned_extensions: false
+        autoinstall_known_extensions: false
+      secrets:
+        - name: azdq_storage
+          type: azure
+          provider: managed_identity
+          persistent: false
+          account_name: "{{ env_var('AZURE_STORAGE_ACCOUNT') }}"
+          client_id: "{{ env_var('AZURE_CLIENT_ID') }}"
+          scope: "{{ env_var('DUCKLAKE_DATA_PATH') }}"
+
+    local:
+      type: duckdb
+      path: ":memory:"
+      schema: dbt_spike
+      threads: 1
+      settings:
+        allow_community_extensions: false
+        allow_unsigned_extensions: false
+        autoinstall_known_extensions: false
+
+    postgres_local:
+      type: duckdb
+      path: ":memory:"
+      schema: dbt_spike
+      threads: 1
+      extensions:
+        - postgres
+      settings:
+        allow_community_extensions: false
+        allow_unsigned_extensions: false
+        autoinstall_known_extensions: false

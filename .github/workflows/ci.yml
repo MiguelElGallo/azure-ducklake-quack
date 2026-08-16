@@ -33,7 +33,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - run: shellcheck scripts/*.sh tests/spike/*.sh
+      - run: shellcheck scripts/*.sh spikes/dbt/*.sh tests/spike/*.sh
+
+  dbt-spike:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker build --tag azdq-dbt-spike:ci --file docker/dbt-spike.Dockerfile .
+      - run: >-
+          docker run --rm --network none
+          --env DBT_TARGET=local
+          --env DBT_SPIKE_RUN_ID=ci
+          --env DUCKLAKE_METADATA_PATH=/tmp/azdq-dbt-spike/metadata.ducklake
+          --env DUCKLAKE_DATA_PATH=/tmp/azdq-dbt-spike/data/
+          azdq-dbt-spike:ci
 
   integration:
     runs-on: ubuntu-latest

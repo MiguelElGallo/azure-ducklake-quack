@@ -41,6 +41,14 @@ Known limitations:
 
 No custom Quack messages are implemented by this project.
 
+## Direct dbt 2 spike
+
+The optional direct path pins dbt Core `2.0.0-alpha.5`, `dbc 0.3.0`, DuckDB
+ADBC `1.5.5`, and DuckDB extensions `1.5.5`. It uses the alpha catalogs v2
+DuckLake contract behind `flags.use_catalogs_v2`; dbt warns that this schema is
+experimental and may change. This path is independent of the Quack client and
+server compatibility contract above. See [dbt-spike.md](dbt-spike.md).
+
 Run the reproducible contract locally with:
 
 ```bash

@@ -1,0 +1,12 @@
+catalogs:
+  - name: lake
+    type: ducklake
+    table_format: default
+    config:
+      duckdb:
+        metadata_path: "{{ env_var('DUCKLAKE_METADATA_PATH', '/tmp/azdq-dbt-spike/metadata.ducklake') }}"
+        data_path: "{{ env_var('DUCKLAKE_DATA_PATH', '/tmp/azdq-dbt-spike/data/') }}"
+        metadata_schema: "{{ env_var('DUCKLAKE_METADATA_SCHEMA', 'public') }}"
+        attach_as: lake
+        create_if_not_exists: true
+        read_only: false

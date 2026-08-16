@@ -6,6 +6,7 @@
     "location": { "value": "${AZURE_LOCATION}" },
     "deployBootstrap": { "value": "${AZDQ_DEPLOY_BOOTSTRAP=false}" },
     "deployApps": { "value": "${AZDQ_DEPLOY_APPS=false}" },
+    "deployDbtSpike": { "value": "${AZDQ_DEPLOY_DBT_SPIKE=false}" },
     "postgresAdminPassword": { "value": "${AZDQ_POSTGRES_ADMIN_PASSWORD}" },
     "postgresReaderPassword": { "value": "${AZDQ_POSTGRES_READER_PASSWORD}" },
     "postgresWriterPassword": { "value": "${AZDQ_POSTGRES_WRITER_PASSWORD}" },
@@ -17,6 +18,7 @@
     "entraReaderGroupId": { "value": "${AZDQ_READER_GROUP_ID}" },
     "entraWriterGroupId": { "value": "${AZDQ_WRITER_GROUP_ID}" },
     "gatewayImage": { "value": "${AZDQ_GATEWAY_IMAGE=}" },
-    "runtimeImage": { "value": "${AZDQ_RUNTIME_IMAGE=}" }
+    "runtimeImage": { "value": "${AZDQ_RUNTIME_IMAGE=}" },
+    "dbtSpikeImage": { "value": "${AZDQ_DBT_SPIKE_IMAGE=}" }
   }
 }
