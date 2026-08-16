@@ -79,7 +79,9 @@ RUN chmod 0555 /opt/azdq/dbt-spike/run.sh \
     && find /opt/azdq/dbt-spike -type f ! -name run.sh -exec chmod 0444 {} + \
     && read -r dbt_user_id < /proc/sys/kernel/random/uuid \
     && printf 'id: %s\n' "$dbt_user_id" > /opt/azdq/dbt-spike/.user.yml \
+    && touch /opt/azdq/dbt-spike/.gitignore \
     && chown azdq:azdq /opt/azdq/dbt-spike/.user.yml \
+    && chown azdq:azdq /opt/azdq/dbt-spike/.gitignore \
     && chmod 0400 /opt/azdq/dbt-spike/.user.yml \
     && chmod 0644 /opt/azdq/dbt-spike/.gitignore
 
