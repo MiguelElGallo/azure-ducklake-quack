@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: direct_dbt_smoke
+    description: >-
+      A one-row proof that dbt Core 2 wrote directly through DuckDB ADBC into
+      DuckLake, without using the Quack gateway or runtime.
+    columns:
+      - name: run_id
+        data_tests:
+          - not_null
+      - name: built_at
+        data_tests:
+          - not_null
+      - name: connection_path
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["dbt-core-2-duckdb-adbc-ducklake"]
+
+  - name: stg_orders
+    description: >-
+      Typed staging relation loaded from the deterministic Parquet source
+      published to ADLS by the dbt spike job.
+    columns:
+      - name: order_id
+        description: Stable source-system order identifier.
+        data_tests:
+          - not_null
+          - unique
+      - name: status
+        description: Normalized order lifecycle status.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["placed", "shipped", "completed", "returned"]
+      - name: amount
+        description: Order amount in the fixture currency.
+        data_tests:
+          - not_null
+      - name: source_updated_at
+        description: Source watermark used by the incremental model.
+        data_tests:
+          - not_null
+
+  - name: fct_orders
+    description: >-
+      Incremental DuckLake fact table merged by order_id from stg_orders. The
+      source_updated_at watermark limits work on subsequent dbt builds.
+    columns:
+      - name: order_id
+        description: Unique grain of the fact table.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+      - name: order_date
+        data_tests:
+          - not_null
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["placed", "shipped", "completed", "returned"]
+      - name: amount
+        data_tests:
+          - not_null
+      - name: source_updated_at
+        data_tests:
+          - not_null
+      - name: dbt_loaded_at
+        description: Timestamp at which dbt last merged the source row.
+        data_tests:
+          - not_null

@@ -29,10 +29,12 @@ Known limitations:
   release therefore makes `quack_query(...)` its explicit public contract.
 - `EXTRA_HTTP_HEADERS` was merged in upstream
   [Quack PR #204](https://github.com/duckdb/duckdb-quack/pull/204) after DuckDB
-  1.5.5. The client image therefore pins the reviewed official preview artifact
-  by architecture, SHA-256, DuckDB source ID, and Quack extension version. The
-  official preview URL moves; a future nightly makes the image build fail closed
-  until those pins are deliberately reviewed and updated.
+  1.5.5. The client image therefore pins the extracted official preview CLI
+  binary by architecture and SHA-256, then also verifies the DuckDB source ID
+  and Quack extension version. Upstream can reproducibly repackage the outer
+  daily artifact without changing the executable, so an archive hash is not a
+  stable binary identity. A future nightly with a changed executable still
+  makes the image build fail closed until the reviewed binary pins are updated.
 - `autoinstall_known_extensions=false` causes Quack requests to return HTTP 500
   even when the required extensions were loaded before the setting changed.
   The pinned image preinstalls them; community and unsigned extensions remain
@@ -40,6 +42,14 @@ Known limitations:
   this preview.
 
 No custom Quack messages are implemented by this project.
+
+## Direct dbt 2 spike
+
+The optional direct path pins dbt Core `2.0.0-alpha.5`, `dbc 0.3.0`, DuckDB
+ADBC `1.5.5`, and DuckDB extensions `1.5.5`. It uses the alpha catalogs v2
+DuckLake contract behind `flags.use_catalogs_v2`; dbt warns that this schema is
+experimental and may change. This path is independent of the Quack client and
+server compatibility contract above. See [dbt-spike.md](dbt-spike.md).
 
 Run the reproducible contract locally with:
 

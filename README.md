@@ -19,6 +19,9 @@ The implementation is Rust; the data plane remains DuckDB and DuckLake.
 - A Rust device-code client that passes the Entra bearer token through Quack's
   supported `EXTRA_HTTP_HEADERS` option.
 - Modular Bicep and a three-stage immutable-image deployment.
+- An opt-in dbt Core 2 alpha Container Apps Job that publishes a Parquet source
+  to ADLS, stages it, and incrementally merges it into DuckLake through the
+  in-process DuckDB ADBC driver, with no Quack hop.
 - An executable Linux integration spike using PostgreSQL 17, a stable DuckDB
   1.5.5 server, and a checksum-pinned official v1.5 preview client.
 
@@ -79,6 +82,7 @@ az bicep build --file infra/main.bicep --stdout >/dev/null
 docker build -f docker/gateway.Dockerfile .
 docker build -f docker/runtime.Dockerfile .
 docker build -f docker/client.Dockerfile .
+docker build -f docker/dbt-spike.Dockerfile .
 ./tests/spike/quack-postgres.sh
 ```
 
@@ -106,6 +110,11 @@ foundation, builds images in ACR, resolves their digests, creates and waits for
 the bootstrap job, and only then creates the reader, writer, and gateway apps.
 All local azd state is under the gitignored `.azure/` directory.
 
+The separately gated dbt 2 spike is documented in
+[docs/dbt-spike.md](docs/dbt-spike.md). Its deployment flag is false by default;
+`scripts/deploy-dbt-spike.sh` builds an immutable image, provisions one manual
+job in the existing environment, and waits for its Parquet-to-DuckLake build.
+
 The quiet development baseline was estimated at roughly USD 36–45/month in
 Sweden Central on 2026-08-15, before taxes, free grants, logs, storage, and
 egress. PostgreSQL B1ms, its 32 GiB minimum storage, ACR Basic, and the always-on
@@ -120,6 +129,7 @@ reader account for most of it.
 - `crates/client`: device-code login and DuckDB CLI handoff.
 - `infra`: subscription-scoped modular Bicep.
 - `scripts`: guarded Entra, staged deployment, and verification workflows.
+- `spikes/dbt`: contained dbt Core 2/DuckDB ADBC/DuckLake proof project.
 
 ## Security boundaries
 
