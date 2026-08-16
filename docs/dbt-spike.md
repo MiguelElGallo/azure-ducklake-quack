@@ -58,6 +58,13 @@ the table when needed, and the second build exercises DuckDB's native incrementa
 `MERGE` path. Repeated job executions remain idempotent because `order_id` is the
 unique key.
 
+The model leaves `on_schema_change` at the adapter default. In dbt Core 2 alpha
+5, strict schema comparison misclassifies equivalent DuckLake types such as
+`BIGINT`/`INTEGER`, `DECIMAL`/`FLOAT8`, and `TIMESTAMP`/`DATETIME` as changes.
+The model tests enforce the current schema and data contract; an intentional
+schema change should use a reviewed full refresh while this alpha behavior
+remains.
+
 ## Connection contract
 
 `spikes/dbt/catalogs.yml` uses the alpha catalogs v2 DuckLake configuration:
@@ -157,21 +164,24 @@ or runtime command.
 
 ## Live Azure validation
 
-The contained spike was deployed and executed in Sweden Central on 2026-08-16.
-Azure Container Apps Job `caj-azdq-dbt-spike` ran dbt Core
-`2.0.0-alpha.5` as a non-root user against the existing PostgreSQL-backed
-DuckLake and ADLS Gen2 data path.
+The expanded pipeline was deployed and executed in Sweden Central on
+2026-08-16. Azure Container Apps Job `caj-azdq-dbt-spike` execution
+`caj-azdq-dbt-spike-vvy35gx` ran dbt Core `2.0.0-alpha.5` as a non-root user
+against the existing PostgreSQL-backed DuckLake and ADLS Gen2 data path.
 
 The live execution produced this proof:
 
-- the `direct_dbt_smoke` model succeeded;
-- a second dbt process reattached DuckLake and passed all four tests;
-- the accepted connection marker was
-  `dbt-core-2-duckdb-adbc-ducklake`; and
+- the job published six rows to
+  `data/sources/dbt-spike/orders.parquet` and previewed all six from ADLS;
+- the full build completed three models and 19 tests with 22/22 successes;
+- the second build completed the incremental `fct_orders` MERGE and nine tests
+  with 10/10 successes;
+- a fresh `dbt show` returned six rows, six distinct orders, dates from
+  `2026-08-10` through `2026-08-15`, and total amount `826.8`; and
 - the execution completed without a Quack URL, token, secret reference,
   command, or runtime in the job configuration.
 
 The deployed image was pinned to digest
-`sha256:302436312e5dc18a70d8ce2739f6e93e8304aca10c7bb0cb88b15cad6fe8e95f`.
+`sha256:965b62b482149b98042e145dd81cf73db5b26e131c66b5ea2b154461a92ebd61`.
 The only dbt warning was the expected notice that catalogs v2 remains
 experimental in this alpha release.
