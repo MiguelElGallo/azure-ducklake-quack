@@ -1,6 +1,6 @@
 FROM python:3.12-slim-bookworm AS dbt-install
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 ARG DBT_CORE_VERSION=2.0.0a5
 ARG DBC_VERSION=0.3.0
 ARG DUCKDB_VERSION=1.5.5
@@ -40,7 +40,7 @@ RUN apt-get update \
 
 FROM debian:bookworm-slim AS extensions
 
-ARG TARGETARCH
+ARG TARGETARCH=amd64
 ARG DUCKDB_VERSION=1.5.5
 
 RUN apt-get update \
@@ -76,7 +76,12 @@ COPY --from=extensions --chown=10001:10001 /opt/azdq/.duckdb /home/azdq/.duckdb
 COPY --chown=10001:10001 spikes/dbt /opt/azdq/dbt-spike
 
 RUN chmod 0555 /opt/azdq/dbt-spike/run.sh \
-    && find /opt/azdq/dbt-spike -type f ! -name run.sh -exec chmod 0444 {} +
+    && find /opt/azdq/dbt-spike -type f ! -name run.sh -exec chmod 0444 {} + \
+    && read -r dbt_user_id < /proc/sys/kernel/random/uuid \
+    && printf 'id: %s\n' "$dbt_user_id" > /opt/azdq/dbt-spike/.user.yml \
+    && chown azdq:azdq /opt/azdq/dbt-spike/.user.yml \
+    && chmod 0400 /opt/azdq/dbt-spike/.user.yml \
+    && chmod 0644 /opt/azdq/dbt-spike/.gitignore
 
 USER 10001:10001
 ENV HOME=/home/azdq \

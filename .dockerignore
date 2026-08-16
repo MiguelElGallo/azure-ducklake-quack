@@ -1,8 +1,9 @@
 .git
 .azure
 target
+spikes/dbt/target
+spikes/dbt/logs
 .env
 .env.*
 *.duckdb
 *.wal
-

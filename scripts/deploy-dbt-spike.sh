@@ -40,6 +40,7 @@ image_tag="spike-${revision}"
 az acr build \
   --registry "$registry_name" \
   --platform linux/amd64 \
+  --build-arg TARGETARCH=amd64 \
   --image "azdq-dbt-spike:${image_tag}" \
   --file docker/dbt-spike.Dockerfile \
   .
