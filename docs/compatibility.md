@@ -29,10 +29,12 @@ Known limitations:
   release therefore makes `quack_query(...)` its explicit public contract.
 - `EXTRA_HTTP_HEADERS` was merged in upstream
   [Quack PR #204](https://github.com/duckdb/duckdb-quack/pull/204) after DuckDB
-  1.5.5. The client image therefore pins the reviewed official preview artifact
-  by architecture, SHA-256, DuckDB source ID, and Quack extension version. The
-  official preview URL moves; a future nightly makes the image build fail closed
-  until those pins are deliberately reviewed and updated.
+  1.5.5. The client image therefore pins the extracted official preview CLI
+  binary by architecture and SHA-256, then also verifies the DuckDB source ID
+  and Quack extension version. Upstream can reproducibly repackage the outer
+  daily artifact without changing the executable, so an archive hash is not a
+  stable binary identity. A future nightly with a changed executable still
+  makes the image build fail closed until the reviewed binary pins are updated.
 - `autoinstall_known_extensions=false` causes Quack requests to return HTTP 500
   even when the required extensions were loaded before the setting changed.
   The pinned image preinstalls them; community and unsigned extensions remain

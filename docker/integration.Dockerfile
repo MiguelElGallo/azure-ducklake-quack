@@ -33,18 +33,18 @@ FROM debian:bookworm-slim AS client-duckdb
 ARG DUCKDB_PREVIEW_SERIES=v1.5-variegata
 ARG DUCKDB_SOURCE_ID=11d6c02c0a
 ARG QUACK_EXTENSION_VERSION=c154811
-ARG DUCKDB_PREVIEW_AMD64_SHA256=dc05418056fd7ac837e125aabe07be8e711485be2ef14936a3959b3adbad351c
-ARG DUCKDB_PREVIEW_ARM64_SHA256=bafc6649a63754bb9e1c7a9cb4ee7146bd24f8879bad57121e98f5eb452df698
+ARG DUCKDB_PREVIEW_AMD64_BINARY_SHA256=bada650d867d63b6f2db322c9d242cfd8290810b08165df538a11449f3015349
+ARG DUCKDB_PREVIEW_ARM64_BINARY_SHA256=43a561a5173c964a3199c12e10587d954a16b8f4f0294bd782f3f374e8ae27f0
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl unzip \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /opt/azdq \
     && DEB_ARCH=$(dpkg --print-architecture) \
-    && case "$DEB_ARCH" in amd64) DUCKDB_ARCH=amd64; DUCKDB_SHA256="$DUCKDB_PREVIEW_AMD64_SHA256" ;; arm64) DUCKDB_ARCH=arm64; DUCKDB_SHA256="$DUCKDB_PREVIEW_ARM64_SHA256" ;; *) exit 1 ;; esac \
+    && case "$DEB_ARCH" in amd64) DUCKDB_ARCH=amd64; DUCKDB_BINARY_SHA256="$DUCKDB_PREVIEW_AMD64_BINARY_SHA256" ;; arm64) DUCKDB_ARCH=arm64; DUCKDB_BINARY_SHA256="$DUCKDB_PREVIEW_ARM64_BINARY_SHA256" ;; *) exit 1 ;; esac \
     && curl -fsSL "https://artifacts.duckdb.org/${DUCKDB_PREVIEW_SERIES}/duckdb-binaries-linux-${DUCKDB_ARCH}.zip" -o /tmp/duckdb-binaries.zip \
-    && echo "${DUCKDB_SHA256}  /tmp/duckdb-binaries.zip" | sha256sum --check --status \
     && unzip -q /tmp/duckdb-binaries.zip "duckdb_cli-linux-${DUCKDB_ARCH}.zip" -d /tmp \
     && unzip -q "/tmp/duckdb_cli-linux-${DUCKDB_ARCH}.zip" -d /usr/local/bin \
+    && echo "${DUCKDB_BINARY_SHA256}  /usr/local/bin/duckdb" | sha256sum --check --status \
     && /usr/local/bin/duckdb --version | grep -F "${DUCKDB_SOURCE_ID}" \
     && HOME=/opt/azdq /usr/local/bin/duckdb -csv -noheader -c "INSTALL quack; SELECT extension_version FROM duckdb_extensions() WHERE extension_name = 'quack';" | grep -Fx "${QUACK_EXTENSION_VERSION}" \
     && HOME=/opt/azdq /usr/local/bin/duckdb -batch -bail -c "LOAD quack; CREATE SECRET azdq_header_probe (TYPE quack, TOKEN 'header-probe-token', EXTRA_HTTP_HEADERS MAP {'Authorization': 'Bearer probe'});" >/dev/null \

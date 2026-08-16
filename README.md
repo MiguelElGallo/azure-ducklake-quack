@@ -19,8 +19,9 @@ The implementation is Rust; the data plane remains DuckDB and DuckLake.
 - A Rust device-code client that passes the Entra bearer token through Quack's
   supported `EXTRA_HTTP_HEADERS` option.
 - Modular Bicep and a three-stage immutable-image deployment.
-- An opt-in dbt Core 2 alpha Container Apps Job that reaches DuckLake directly
-  through the in-process DuckDB ADBC driver, with no Quack hop.
+- An opt-in dbt Core 2 alpha Container Apps Job that publishes a Parquet source
+  to ADLS, stages it, and incrementally merges it into DuckLake through the
+  in-process DuckDB ADBC driver, with no Quack hop.
 - An executable Linux integration spike using PostgreSQL 17, a stable DuckDB
   1.5.5 server, and a checksum-pinned official v1.5 preview client.
 
@@ -112,7 +113,7 @@ All local azd state is under the gitignored `.azure/` directory.
 The separately gated dbt 2 spike is documented in
 [docs/dbt-spike.md](docs/dbt-spike.md). Its deployment flag is false by default;
 `scripts/deploy-dbt-spike.sh` builds an immutable image, provisions one manual
-job in the existing environment, and waits for its direct DuckLake smoke test.
+job in the existing environment, and waits for its Parquet-to-DuckLake build.
 
 The quiet development baseline was estimated at roughly USD 36–45/month in
 Sweden Central on 2026-08-15, before taxes, free grants, logs, storage, and

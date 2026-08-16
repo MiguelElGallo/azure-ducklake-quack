@@ -15,6 +15,7 @@ param postgresDatabaseName string
 param postgresWriterPasswordSecretUri string
 
 var moduleTags = union(tags, { 'azdq-module': name })
+var parquetSourcePath = '${dataPath}sources/dbt-spike/orders.parquet'
 
 resource dbtSpike 'Microsoft.App/jobs@2025-01-01' = {
   name: 'caj-azdq-dbt-spike'
@@ -53,6 +54,7 @@ resource dbtSpike 'Microsoft.App/jobs@2025-01-01' = {
             { name: 'DUCKLAKE_METADATA_PATH', value: 'postgres:' }
             { name: 'DUCKLAKE_METADATA_SCHEMA', value: 'public' }
             { name: 'DUCKLAKE_DATA_PATH', value: dataPath }
+            { name: 'DBT_PARQUET_SOURCE_PATH', value: parquetSourcePath }
             { name: 'AZURE_STORAGE_ACCOUNT', value: storageAccountName }
             { name: 'AZURE_CLIENT_ID', value: writerIdentityClientId }
             { name: 'PGHOST', value: postgresServerFqdn }
