@@ -121,3 +121,24 @@ The job output must include all of the following:
 An execution that reaches Quack is outside this topology: neither the job
 definition nor its dbt project contains a Quack URL, token, gateway hostname,
 or runtime command.
+
+## Live Azure validation
+
+The contained spike was deployed and executed in Sweden Central on 2026-08-16.
+Azure Container Apps Job `caj-azdq-dbt-spike` ran dbt Core
+`2.0.0-alpha.5` as a non-root user against the existing PostgreSQL-backed
+DuckLake and ADLS Gen2 data path.
+
+The live execution produced this proof:
+
+- the `direct_dbt_smoke` model succeeded;
+- a second dbt process reattached DuckLake and passed all four tests;
+- the accepted connection marker was
+  `dbt-core-2-duckdb-adbc-ducklake`; and
+- the execution completed without a Quack URL, token, secret reference,
+  command, or runtime in the job configuration.
+
+The deployed image was pinned to digest
+`sha256:302436312e5dc18a70d8ce2739f6e93e8304aca10c7bb0cb88b15cad6fe8e95f`.
+The only dbt warning was the expected notice that catalogs v2 remains
+experimental in this alpha release.
