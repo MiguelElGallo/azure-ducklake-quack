@@ -8,7 +8,7 @@ The implementation is Rust; the data plane remains DuckDB and DuckLake.
 > preview, not a production security boundary. See the pinned compatibility
 > contract and upstream limitation before deploying.
 
-## What v0.1.0 provides
+## What v0.2.0 provides
 
 - PostgreSQL-backed DuckLake metadata and ADLS Gen2 Parquet storage.
 - Separate Quack reader and writer processes with independent managed identities,
@@ -19,7 +19,7 @@ The implementation is Rust; the data plane remains DuckDB and DuckLake.
 - A Rust device-code client that passes the Entra bearer token through Quack's
   supported `EXTRA_HTTP_HEADERS` option.
 - Modular Bicep and a three-stage immutable-image deployment.
-- An opt-in dbt Core 2 alpha Container Apps Job that publishes a Parquet source
+- An opt-in dbt Core 2 beta Container Apps Job that publishes a Parquet source
   to ADLS, stages it, and incrementally merges it into DuckLake through the
   in-process DuckDB ADBC driver, with no Quack hop.
 - An executable Linux integration spike using PostgreSQL 17, a stable DuckDB
@@ -51,7 +51,7 @@ Role selection happens when a connection is created:
 - Roles cannot be switched inside an established Quack connection.
 
 This is intentionally similar to selecting a Snowflake primary role. Secondary
-roles are not part of v0.1.0; a new connection is required to select another
+roles are not part of v0.2.0; a new connection is required to select another
 role.
 
 ## Query contract
@@ -150,12 +150,12 @@ DuckLake and PostgreSQL extensions. Setting
 the images preinstall pinned extensions and the runtime blocks community and
 unsigned extensions instead. The integration contract tests this exact setup.
 
-PostgreSQL and Storage use public endpoints in v0.1.0 because Consumption ACA
+PostgreSQL and Storage use public endpoints in v0.2.0 because Consumption ACA
 does not provide stable outbound IPs without adding a VNet/NAT cost. Access is
 still authenticated, TLS-protected, and least-privilege. A production profile
 should add VNet integration and private endpoints.
 
 Gateway requests have a 230-second upstream deadline so the service returns an
-explicit failure before Container Apps' 240-second HTTP request limit. v0.1.0
+explicit failure before Container Apps' 240-second HTTP request limit. v0.2.0
 therefore targets interactive queries shorter than that boundary; asynchronous
 query execution is deferred.

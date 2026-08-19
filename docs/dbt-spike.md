@@ -7,7 +7,7 @@ service between dbt and DuckDB.
 
 ```text
 Container Apps Job
-  -> dbt Core 2.0.0-alpha.5
+  -> dbt Core 2.0.0-beta.2
   -> DuckDB ADBC 1.5.5 (in process)
   -> ADLS Parquet source: data/sources/dbt-spike/orders.parquet
   -> stg_orders (table)
@@ -19,14 +19,15 @@ Container Apps Job
 
 ## What is pinned
 
-The image pins dbt Core `2.0.0a5`, `dbc 0.3.0`, DuckDB ADBC `1.5.5`, and
+The image pins dbt Core `2.0.0b2`, `dbc 0.3.0`, DuckDB ADBC `1.5.5`, and
 DuckDB extensions `1.5.5`. The dbt and `dbc` wheels are downloaded by exact
 URL and verified with SHA-256. `dbc` installs and verifies the DuckDB driver
 during the image build. The `azure`, `ducklake`, and `postgres` extensions are
 also installed during the image build, so the job needs no dependency download
-at execution time.
+at execution time. The final image retains Python 3.12 and the installed Python
+packages because the beta 2 wheel exposes `dbt` through a Python launcher.
 
-This remains an experimental contract. dbt Core 2 alpha 5 emits a warning that
+This remains an experimental contract. dbt Core 2 beta 2 emits a warning that
 the catalogs v2 schema is not officially supported and may change. The project
 therefore enables `flags.use_catalogs_v2` explicitly and keeps every version
 pin visible in `docker/dbt-spike.Dockerfile`.
@@ -58,16 +59,16 @@ the table when needed, and the second build exercises DuckDB's native incrementa
 `MERGE` path. Repeated job executions remain idempotent because `order_id` is the
 unique key.
 
-The model leaves `on_schema_change` at the adapter default. In dbt Core 2 alpha
-5, strict schema comparison misclassifies equivalent DuckLake types such as
-`BIGINT`/`INTEGER`, `DECIMAL`/`FLOAT8`, and `TIMESTAMP`/`DATETIME` as changes.
-The model tests enforce the current schema and data contract; an intentional
-schema change should use a reviewed full refresh while this alpha behavior
-remains.
+The model leaves `on_schema_change` at the adapter default. The earlier alpha 5
+spike found that strict schema comparison misclassified equivalent DuckLake
+types such as `BIGINT`/`INTEGER`, `DECIMAL`/`FLOAT8`, and
+`TIMESTAMP`/`DATETIME` as changes. The model tests enforce the current schema
+and data contract; an intentional schema change should still use a reviewed
+full refresh until that stricter path is separately qualified on beta 2.
 
 ## Connection contract
 
-`spikes/dbt/catalogs.yml` uses the alpha catalogs v2 DuckLake configuration:
+`spikes/dbt/catalogs.yml` uses the prerelease catalogs v2 DuckLake configuration:
 
 ```yaml
 catalogs:
@@ -112,6 +113,12 @@ the image. It publishes a local Parquet source, previews all six source rows,
 builds three models with 19 tests, reruns the incremental model with nine tests,
 and reads the final six-row fact table in a fresh dbt process.
 
+This contract passed on ARM64 on 2026-08-19 with dbt Core `2.0.0-beta.2`: the
+full build reported 22/22 successes, the incremental rerun reported 10/10
+successes, and the final query returned six distinct orders totaling `826.8`.
+The production-target `linux/amd64` image also built successfully and its
+runtime reported `dbt-core 2.0.0-beta.2`.
+
 ## Azure execution
 
 Prerequisites:
@@ -150,7 +157,7 @@ relations include `lake.dbt_spike.stg_orders` and
 
 The job output must include all of the following:
 
-- `dbt-core 2.0.0-alpha.5`
+- `dbt-core 2.0.0-beta.2`
 - a Parquet publication message targeting the ADLS source prefix
 - six source rows in the `stg_orders` preview
 - three successful models and 19 passing tests in the full DAG build

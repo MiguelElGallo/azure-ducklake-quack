@@ -1,6 +1,6 @@
 # Quack compatibility contract
 
-The v0.1.0 server spike uses DuckDB 1.5.5, its matching extensions, PostgreSQL
+The v0.2.0 server spike uses DuckDB 1.5.5, its matching extensions, PostgreSQL
 17, and Linux containers. The authenticated client requires the official DuckDB
 v1.5 preview build `v1.5.6-dev66` (`11d6c02c0a`) with Quack `c154811` because
 Quack custom headers landed after the 1.5.5 release. The Rust runtime supervises
@@ -45,8 +45,8 @@ No custom Quack messages are implemented by this project.
 
 ## Direct dbt 2 spike
 
-The optional direct path pins dbt Core `2.0.0-alpha.5`, `dbc 0.3.0`, DuckDB
-ADBC `1.5.5`, and DuckDB extensions `1.5.5`. It uses the alpha catalogs v2
+The optional direct path pins dbt Core `2.0.0-beta.2`, `dbc 0.3.0`, DuckDB
+ADBC `1.5.5`, and DuckDB extensions `1.5.5`. It uses the prerelease catalogs v2
 DuckLake contract behind `flags.use_catalogs_v2`; dbt warns that this schema is
 experimental and may change. This path is independent of the Quack client and
 server compatibility contract above. See [dbt-spike.md](dbt-spike.md).
@@ -62,5 +62,6 @@ PostgreSQL logins, exercises the real `azdq` process, commits through the writer
 reconnects through the default reader, and requires a reader write to fail.
 
 For the Azure verification script, set `DUCKDB_PATH` to a client with custom
-header support. v0.1.0 was validated with the official v1.5 preview build above;
-the script performs a feature probe before requesting Entra authentication.
+header support. The initial v0.1.0 release was validated with the official v1.5
+preview build above; v0.2.0 retains the same reviewed binary identity, and the
+script performs a feature probe before requesting Entra authentication.

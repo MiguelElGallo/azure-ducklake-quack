@@ -113,8 +113,8 @@ for attempt in {1..30}; do
 done
 
 revision=$(git rev-parse --short=12 HEAD)
-gateway_tag="v0.1.0-${revision}"
-runtime_tag="v0.1.0-${revision}"
+gateway_tag="v0.2.0-${revision}"
+runtime_tag="v0.2.0-${revision}"
 
 az acr build --registry "$registry_name" --image "azdq-gateway:${gateway_tag}" --file docker/gateway.Dockerfile .
 az acr build --registry "$registry_name" --image "azdq-runtime:${runtime_tag}" --file docker/runtime.Dockerfile .
