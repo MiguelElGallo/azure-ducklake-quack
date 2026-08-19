@@ -376,7 +376,7 @@ dependencies = [
 
 [[package]]
 name = "azdq-client"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "azdq-policy",
@@ -390,7 +390,7 @@ dependencies = [
 
 [[package]]
 name = "azdq-gateway"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -411,7 +411,7 @@ dependencies = [
 
 [[package]]
 name = "azdq-policy"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "thiserror",
@@ -419,7 +419,7 @@ dependencies = [
 
 [[package]]
 name = "azdq-runtime"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",

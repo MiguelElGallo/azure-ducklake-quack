@@ -1,7 +1,8 @@
 FROM python:3.12-slim-bookworm AS dbt-install
 
-ARG TARGETARCH=amd64
-ARG DBT_CORE_VERSION=2.0.0a5
+ARG TARGETARCH
+ARG DBT_CORE_VERSION=2.0.0b2
+ARG DBT_CORE_TAG=2.0.0-beta.2
 ARG DBC_VERSION=0.3.0
 ARG DUCKDB_VERSION=1.5.5
 
@@ -11,28 +12,29 @@ RUN apt-get update \
     && case "$TARGETARCH" in \
          amd64) \
            DBT_PLATFORM=manylinux_2_28_x86_64; \
-           DBT_SHA256=a8e3f960d6070cde00cd8a2bb85dd3ce9b8f2e755de6eab42ea469e1ab778629; \
+           DBT_SHA256=4ff1d0d3df6360ccc7fad54b3022b953ff6df6e0b73a24c5ba4956502408a0f9; \
            DBC_FILENAME=dbc-0.3.0-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.whl; \
            DBC_SHA256=57c358cd9dec0b4f2b168ec60c213b059a0aeeeecdb6c4e65f5a489f287e2316; \
            DBC_URL=https://files.pythonhosted.org/packages/22/49/d79b26b9c7872cb3553175119b10a53e4b59b27335817f895d98b425fbb3/dbc-0.3.0-py3-none-manylinux_2_12_x86_64.manylinux2010_x86_64.whl \
            ;; \
          arm64) \
            DBT_PLATFORM=manylinux_2_28_aarch64; \
-           DBT_SHA256=2a5a99c8dc9072374318a6b7ac42a760d3e5f1b01cc97ffb203e144d9b03af4f; \
+           DBT_SHA256=ca646d2ad65e5660ccd82fecfc33b871050ea43e3b3ed242881a03eaba693e0a; \
            DBC_FILENAME=dbc-0.3.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl; \
            DBC_SHA256=914e1c7da8ee31b662ce5925d67c2f8a7f0d2f9e4228f8458d3a6e331e53dd0f; \
            DBC_URL=https://files.pythonhosted.org/packages/99/33/c720b150c2c4276fba528a2760059335d9fa0651340282bf005cf661e94d/dbc-0.3.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl \
            ;; \
          *) echo "Unsupported architecture: ${TARGETARCH}" >&2; exit 1 ;; \
        esac \
-    && DBT_FILENAME="dbt_core-${DBT_CORE_VERSION}-py3-none-${DBT_PLATFORM}.whl" \
+    && DBT_FILENAME="dbt_core-${DBT_CORE_VERSION}-cp311-abi3-${DBT_PLATFORM}.whl" \
     && curl -fsSL \
-         "https://github.com/dbt-labs/dbt-core/releases/download/v2.0.0-alpha.5/${DBT_FILENAME}" \
+         "https://github.com/dbt-labs/dbt-core/releases/download/v${DBT_CORE_TAG}/${DBT_FILENAME}" \
          -o "/tmp/${DBT_FILENAME}" \
     && echo "${DBT_SHA256}  /tmp/${DBT_FILENAME}" | sha256sum -c - \
     && curl -fsSL "$DBC_URL" -o "/tmp/${DBC_FILENAME}" \
     && echo "${DBC_SHA256}  /tmp/${DBC_FILENAME}" | sha256sum -c - \
     && python -m pip install --no-cache-dir "/tmp/${DBT_FILENAME}" "/tmp/${DBC_FILENAME}" \
+    && python -m pip check \
     && dbc install --level system "duckdb=${DUCKDB_VERSION}" \
     && dbc list --json \
     && dbt --version \
@@ -40,7 +42,7 @@ RUN apt-get update \
 
 FROM debian:bookworm-slim AS extensions
 
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 ARG DUCKDB_VERSION=1.5.5
 
 RUN apt-get update \
@@ -60,7 +62,7 @@ RUN apt-get update \
     && HOME=/opt/azdq duckdb -c "INSTALL azure; INSTALL ducklake; INSTALL postgres;" \
     && rm -f /tmp/duckdb.zip
 
-FROM debian:bookworm-slim
+FROM python:3.12-slim-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates libgcc-s1 libstdc++6 \
@@ -71,6 +73,7 @@ RUN apt-get update \
     && chown -R azdq:azdq /opt/azdq /tmp/azdq-dbt-spike
 
 COPY --from=dbt-install /usr/local/bin/dbt /usr/local/bin/dbt
+COPY --from=dbt-install /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=dbt-install /etc/adbc /etc/adbc
 COPY --from=extensions --chown=10001:10001 /opt/azdq/.duckdb /home/azdq/.duckdb
 COPY --chown=10001:10001 spikes/dbt /opt/azdq/dbt-spike
